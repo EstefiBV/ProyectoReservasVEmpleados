@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "Guardar Reserva";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card shadow-sm mt-2">
+    <div class="card-body p-3">
+        <h6 class="card-title font-weight-bold text-primary">Guardar Reserva</h6>
+        <hr class="mt-1 mb-1" />
+        <div class="modal-body">
+            @using (Html.BeginForm("", "", FormMethod.Post, new { id = "formReserva" }))
+            {
+                <div class="form-row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-text font-weight-bold">Vuelo:</label>
+                        <select id="cbovuelo" name="oVuelo.IdVuelo" class="form-control">
+                            <!-- Opciones se cargarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-text font-weight-bold">Tipo de Asiento:</label>
+                        <select id="cbotipoasiento" name="oTipoAsiento.IdTipoAsiento" class="form-control">
+                            <!-- Opciones se cargarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-text font-weight-bold">Equipaje:</label>
+                        <select id="cboequipaje" name="oEquipaje.IdEquipaje" class="form-control">
+                            <!-- Opciones se cargarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Campo para la cantidad de pasajeros -->
+                <div class="form-row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-text font-weight-bold">Cantidad de Pasajeros:</label>
+                        <input type="number" id="cantidadPasajeros" name="CantidadPasajeros" class="form-control" min="1" required />
+                    </div>
+                </div>
+
+                <!-- Campos ocultos para los precios -->
+                <input type="hidden" id="precioVuelo" name="PrecioVuelo" />
+                <input type="hidden" id="precioAsiento" name="PrecioAsiento" />
+                <input type="hidden" id="precioEquipaje" name="PrecioEquipaje" />
+                <input type="hidden" id="precioTotal" name="PrecioTotal" />
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-block btn-primary">
+                            <i class="fas fa-save"></i> Guardar Reserva
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Mensaje flotante -->
+<div id="message" class="alert" style="display: none; position: fixed; bottom: 10px; right: 10px; width: 300px; z-index: 1050;"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var userId = '@HttpContext.Current.Session["IdPersona"]'; // Obtener el ID del usuario desde la sesión
+
+            // Llenar select de Vuelo
+            $.ajax({
+                url: '/api/Reporte/ListarVuelos',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#cbovuelo").empty().append('<option value="0" data-precio="0" data-pasajeros="0">Seleccione un vuelo</option>');
+
+                    $.each(data, function (index, value) {
+                        var fechaHoraSalida = new Date(value.FechaHoraSalida).toLocaleString();
+                        var fechaHoraLlegada = new Date(value.FechaHoraLlegada).toLocaleString();
+                        var fechaHoraLlegada = new Date(value.FechaHoraLlegada).toLocaleString();
+                        $("<option>").attr({
+                            "value": value.IdVuelo,
+                            "data-precio": value.Precio,
+                            "data-pasajeros": value.NumeroPasajeros
+                        }).text(`Destino: ${value.Destino} - Aerolínea: ${value.Aerolinea} - Salida: ${fechaHoraSalida} - Llegada: ${fechaHoraLlegada} - Precio: ${value.Precio} USD - Campos Disponibles: ${value.NumeroPasajeros}`)
+                          .appendTo("#cbovuelo");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Llenar select de Tipo de Asiento
+            $.ajax({
+                url: '/api/Reporte/ListarTiposAsiento',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#cbotipoasiento").empty().append('<option value="0" data-precio="0">Seleccione un tipo de asiento</option>');
+                    $.each(data, function (index, value) {
+                        $("<option>").attr({
+                            "value": value.IdTipoAsiento,
+                            "data-precio": value.PrecioExtra
+                        }).text(`${value.Descripcion} - Precio: ${value.PrecioExtra} USD`).appendTo("#cbotipoasiento");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Llenar select de Equipaje
+            $.ajax({
+                url: '/api/Reporte/ListarEquipajes',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#cboequipaje").empty().append('<option value="0" data-precio="0">Seleccione un equipaje</option>');
+                    $.each(data, function (index, value) {
+                        $("<option>").attr({
+                            "value": value.IdEquipaje,
+                            "data-precio": value.Precio
+                        }).text(`Peso: ${value.Peso} kg - Precio: ${value.Precio} USD`).appendTo("#cboequipaje");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Validar la cantidad de pasajeros al cambiar el vuelo seleccionado
+            $("#cbovuelo").on("change", function () {
+                var maxPasajeros = parseInt($(this).find("option:selected").data("pasajeros")) || 0;
+                $("#cantidadPasajeros").attr("max", maxPasajeros);
+                $("#cantidadPasajeros").val(Math.min($("#cantidadPasajeros").val() || 0, maxPasajeros));
+            });
+
+            // Capturar los precios al enviar el formulario
+            $("form").on("submit", function () {
+                var precioVuelo = $("#cbovuelo option:selected").data("precio") || 0;
+                var precioAsiento = $("#cbotipoasiento option:selected").data("precio") || 0;
+                var precioEquipaje = $("#cboequipaje option:selected").data("precio") || 0;
+                var precioTotal = parseFloat(precioVuelo) + parseFloat(precioAsiento) + parseFloat(precioEquipaje);
+                var totalPagado = precioTotal;
+                var costoPenalidad = 0;
+
+                $("#precioVuelo").val(precioVuelo);
+                $("#precioAsiento").val(precioAsiento);
+                $("#precioEquipaje").val(precioEquipaje);
+                $("#precioTotal").val(precioTotal);
+                $("#totalPagado").val(totalPagado);
+                $("#costoPenalidad").val(costoPenalidad);
+            });
+
+
+
+            $(document).ready(function () {
+                $("#formReserva").on("submit", function (event) {
+                    event.preventDefault();
+
+                    var $form = $(this);
+                    if ($form[0].checkValidity()) {
+                        var request = {
+                            idReserva: parseInt($("#txtid").val()),
+                            oVuelo: {
+                                IdVuelo: parseInt($("#cbovuelo").val())
+                            },
+                            oTipoAsiento: {
+                                IdTipoAsiento: parseInt($("#cbotipoasiento").val())
+                            },
+                            oEquipaje: {
+                                IdEquipaje: parseInt($("#cboequipaje").val())
+                            },
+                            CantidadPasajeros: parseInt($("#cantidadPasajeros").val()),
+                            PrecioVuelo: parseFloat($("#precioVuelo").val()),
+                            PrecioAsiento: parseFloat($("#precioAsiento").val()),
+                            PrecioEquipaje: parseFloat($("#precioEquipaje").val()),
+                            oPersona: {
+                                IdPersona: parseInt(userId)
+                            }
+                        };
+
+                        $.ajax({
+                            url: '/api/Reporte/RegistrarVuelo', // Ajusta la URL de tu API
+                            type: "POST",
+                            contentType: "application/json;charset=utf-8",
+                            data: JSON.stringify(request),
+                            success: function (resultado) {
+                                if (resultado) {
+                                    tablaReservas.ajax.reload();
+                                    $("#FormModal").modal("hide");
+                                    alert("Reserva guardada exitosamente.");
+                                } else {
+                                    alert("Ocurrió un error al guardar la reserva.");
+                                }
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                    } else {
+                        $form.addClass('was-validated');
+                    }
+                });
+            });
+
+        });
+    </script>
+}
+

@@ -1,0 +1,202 @@
+﻿
+@{ ViewBag.Title = "Registro";
+Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Registrar Usuario</title>
+    @Styles.Render("~/Content/css")
+    <link href="~/css/styleregistro.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-primary">
+                        <h6 class="m-0 font-weight-bold text-white">Registrar Usuario</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="crear-cuenta-form" asp-controller="Cuenta" asp-action="CrearCuenta" method="post" class="form-hover">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="cbotipodocumento">Tipo Documento:</label>
+                                        <select class="form-control" id="cbotipodocumento" required>
+                                            <option value="">Seleccione un tipo de documento</option>
+                                            <option value="DNI">DNI</option>
+                                            <option value="PASAPORTE">PASAPORTE</option>
+                                            <option value="CARNET EXTRANJERIA">CARNET EXTRANJERIA</option>
+                                        </select>
+                                        <span class="error-message" id="cbotipodocumento-error" style="display:none;">Este campo es obligatorio.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="txtdocumento">Nro Documento:</label>
+                                        <input type="text" class="form-control" id="txtdocumento" name="documento" autocomplete="off" required pattern="\d{8,12}" title="Debe contener entre 8 y 12 dígitos numéricos.">
+                                        <span class="error-message" id="txtdocumento-error" style="display:none;">Debe contener entre 8 y 12 dígitos numéricos.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="txtnombre">Nombre:</label>
+                                <input type="text" class="form-control" id="txtnombre" name="nombre" autocomplete="off" required pattern="[a-zA-Z\s]+" title="Solo se permiten letras y espacios.">
+                                <span class="error-message" id="txtnombre-error" style="display:none;">Solo se permiten letras y espacios.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="txtapellido">Apellido:</label>
+                                <input type="text" class="form-control" id="txtapellido" name="apellido" autocomplete="off" required pattern="[a-zA-Z\s]+" title="Solo se permiten letras y espacios.">
+                                <span class="error-message" id="txtapellido-error" style="display:none;">Solo se permiten letras y espacios.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="txtcorreo">Correo:</label>
+                                <input type="email" class="form-control" id="txtcorreo" name="correo" autocomplete="off" required>
+                                <span class="error-message" id="txtcorreo-error" style="display:none;">Por favor, ingrese una dirección de correo electrónico válida.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="txtclave">Contraseña:</label>
+                                <input type="password" class="form-control" id="txtclave" name="clave" autocomplete="off" required minlength="6" title="Debe contener al menos 6 caracteres.">
+                                <span class="error-message" id="txtclave-error" style="display:none;">Debe contener al menos 6 caracteres.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="cbotipo">Tipo:</label>
+                                <select id="cbotipo" class="form-control" required>
+                                    <option value="">Seleccione el tipo de usuario</option>
+                                    <!-- Opciones se cargarán dinámicamente -->
+                                </select>
+                                <span class="error-message" id="cbotipo-error" style="display:none;">Este campo es obligatorio.</span>
+                            </div>
+                            <div class="form-group" id="specialPasswordField" style="display:none;">
+                                <label for="txtPasswordEspecial">Contraseña Especial:</label>
+                                <input type="password" class="form-control" id="txtPasswordEspecial" autocomplete="off">
+                                <div id="passwordValidationMessage" style="color: red; display: none;">Contraseña especial incorrecta.</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cboEstado">Estado:</label>
+                                <select id="cboEstado" class="form-control" required>
+                                    <option value="1">Activo</option>
+                                    <option value="0">No Activo</option>
+                                </select>
+                                <span class="error-message" id="cboEstado-error" style="display:none;">Este campo es obligatorio.</span>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "Login")'">Cerrar</button>
+                                <button type="button" class="btn btn-primary" id="btnGuardar" onclick="Guardar()" disabled>Guardar</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section scripts{
+        <script>
+        $(document).ready(function () {
+            // Cargar los tipos de persona
+            jQuery.ajax({
+                url: '/api/Inicio/ListarTipoPersona', 
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    $.each(data.data, function (index, value) {
+                        $("<option>").attr({ "value": value.IdTipoPersona }).text(value.Descripcion).appendTo("#cbotipo");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Mostrar u ocultar el campo de contraseña especial basado en el tipo seleccionado
+            $("#cbotipo").change(function () {
+                var tipoSeleccionado = $(this).val();
+                var tipoAdministrador = 1; // IdTipoPersona para Administrador
+                var tipoEmpleado = 2; // IdTipoPersona para Empleado
+
+                if (tipoSeleccionado == tipoAdministrador || tipoSeleccionado == tipoEmpleado) {
+                    $("#specialPasswordField").show();
+                } else {
+                    $("#specialPasswordField").hide();
+                    $("#txtPasswordEspecial").val(""); // Limpiar el campo de contraseña especial si no es necesario
+                    $("#passwordValidationMessage").hide();
+                    $("#btnGuardar").prop("disabled", false); // Habilitar el botón de guardar si no es necesario
+                }
+            });
+
+            // Validar la contraseña especial
+            $("#txtPasswordEspecial").on("input", function () {
+                var contraseñaEspecial = $(this).val();
+                var contraseñaCorrectaAdministrador = "admin123"; // Contraseña especial para Administrador
+                var contraseñaCorrectaEmpleado = "empleado123"; // Contraseña especial para Empleado
+
+                var tipoSeleccionado = $("#cbotipo").val();
+                var tipoAdministrador = 1;
+                var tipoEmpleado = 2;
+
+                var contraseñaCorrecta = tipoSeleccionado == tipoAdministrador ? contraseñaCorrectaAdministrador :
+                                         tipoSeleccionado == tipoEmpleado ? contraseñaCorrectaEmpleado : "";
+
+                if (contraseñaEspecial == contraseñaCorrecta) {
+                    $("#passwordValidationMessage").hide();
+                    $("#btnGuardar").prop("disabled", false);
+                } else {
+                    $("#passwordValidationMessage").show();
+                    $("#btnGuardar").prop("disabled", true);
+                }
+            });
+        });
+
+            function Guardar() {
+                // Crear el objeto de solicitud con la estructura esperada
+                var request = {
+                    IdPersona: $("#txtid").val(),
+                    TipoDocumento: $("#cbotipodocumento").val(),
+                    Documento: $("#txtdocumento").val(),
+                    Nombre: $("#txtnombre").val(),
+                    Apellido: $("#txtapellido").val(),
+                    Correo: $("#txtcorreo").val(),
+                    Clave: $("#txtclave").val(),
+                    oTipoPersona: { IdTipoPersona: $("#cbotipo option:selected").val() },
+                    Estado: parseInt($("#cboEstado").val()) === 1
+                };
+
+                // Realizar la llamada AJAX
+                jQuery.ajax({
+                    url: '/api/Inicio/GuardarPersona',  // Asegúrate de que esta URL sea correcta
+                    type: "POST",
+                    data: JSON.stringify(request),  // Pasar solo el objeto `request` directamente
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if (data.resultado) {
+                            alert("Usuario registrado con éxito");
+                            // Resetear el formulario después de guardar
+                            $('#formNivel')[0].reset();
+                            $("#specialPasswordField").hide(); // Ocultar el campo de contraseña especial si es necesario
+                            $("#btnGuardar").prop("disabled", true); // Deshabilitar el botón de guardar por defecto
+                            tabladata.ajax.reload(); // Recargar la tabla si es necesario
+                            $('#FormModal').modal('hide'); // Cerrar el modal después de guardar
+                        } else {
+                            alert("No se pudo guardar los cambios");
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error:", error.responseText);  // Mejorar el manejo de errores
+                    }
+                });
+            }
+
+            // Asigna la función de validación al evento submit del formulario
+            document.getElementById('crear-cuenta-form').addEventListener('submit', validarCrearCuenta);
+        </script>
+    }
+</body>
+</html>

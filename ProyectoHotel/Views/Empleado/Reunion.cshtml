@@ -1,0 +1,313 @@
+﻿@{
+    ViewBag.Title = "Reuniones";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- DataTables Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Reuniones</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-success btn-sm" type="button" onclick="abrirModal(null)">Crear Nueva</button>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Lugar</th>
+                                <th>Descripción</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Lugar</th>
+                                <th>Descripción</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Reunión</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtcorreo" type="hidden" value="" />
+                <input id="txtNombreEmpleado" type="hidden" value="" />
+                <form id="formReunion" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEmpleado">Empleado:</label>
+                                <select id="cboEmpleado" class="form-control" required>
+                                    <option value="">Seleccione un empleado</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un empleado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtFecha">Fecha:</label>
+                                <input type="date" class="form-control" id="txtFecha" name="fecha" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la fecha.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtHoraInicio">Hora Inicio:</label>
+                                <input type="time" class="form-control" id="txtHoraInicio" name="horaInicio" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la hora de inicio.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtHoraFin">Hora Fin:</label>
+                                <input type="time" class="form-control" id="txtHoraFin" name="horaFin" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la hora de fin.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtLugar">Lugar:</label>
+                                <input type="text" class="form-control" id="txtLugar" name="lugar" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese el lugar.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtDescripcion">Descripción:</label>
+                                <textarea class="form-control" id="txtDescripcion" name="descripcion" required></textarea>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la descripción.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var tabladata;
+
+        $(document).ready(function () {
+            // Cargar opciones de empleados
+            jQuery.ajax({
+                url: '/api/Inicio/ListarPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboEmpleado").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        if (value.oTipoPersona.IdTipoPersona == 2) {
+                            $("<option>").attr({ "value": value.IdPersona, "data-nombre": value.Nombre + ' ' + value.Apellido, "data-correo": value.Correo  }).text(value.Nombre + ' ' + value.Apellido).appendTo("#cboEmpleado");
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Configuración de DataTable
+            tabladata = $('#tabla').DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '/api/Empleado/ListarReuniones',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreEmpleado" }, // Asegúrate de que el nombre de la columna sea el correcto
+                    { "data": "Fecha" },
+                    { "data": "HoraInicio" },
+                    { "data": "HoraFin" },
+                    { "data": "Lugar" },
+                    { "data": "Descripcion" },
+                    {
+                        "data": "IdReunion", "render": function (data, type, row) {
+                            return $("<button>").addClass("btn btn-primary btn-editar btn-sm").append(
+                                $("<i>").addClass("fas fa-pen")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                                +
+                                $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                    $("<i>").addClass("fas fa-trash")
+                                ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "90px"
+                    }
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-editar', function () {
+            var json = $(this).data("informacion");
+            abrirModal(json);
+        });
+
+        function abrirModal(json) {
+            $("#txtid").val(0);
+            $("#cboEmpleado").val("");
+            $("#txtNombreEmpleado").val("");
+            $("#txtFecha").val("");
+            $("#txtHoraInicio").val("");
+            $("#txtHoraFin").val("");
+            $("#txtLugar").val("");
+            $("#txtDescripcion").val("");
+
+            if (json != null) {
+                $("#txtid").val(json.IdReunion);
+                $("#cboEmpleado").val(json.IdPersona);
+                $("#txtNombreEmpleado").val(json.NombreEmpleado); // Set the hidden field value
+                $("#txtFecha").val(json.Fecha);
+                $("#txtHoraInicio").val(json.HoraInicio);
+                $("#txtHoraFin").val(json.HoraFin);
+                $("#txtLugar").val(json.Lugar);
+                $("#txtDescripcion").val(json.Descripcion);
+            }
+
+            $('#FormModal').modal('show');
+        }
+
+        $(document).on('click', '.btn-eliminar', function () {
+            var json = $(this).attr("data-informacion");
+            eliminar(JSON.parse(json).IdReunion);
+        });
+
+        function eliminar(id) {
+            if (confirm("¿Desea eliminar la reunión seleccionada?")) {
+                $.ajax({
+                    url: '/api/Empleado/EliminarReunion/' + id,
+                    type: "DELETE",
+                    contentType: "application/json;charset=utf-8",
+                    success: function (resultado) {
+                        if (resultado.resultado) {
+                            tabladata.ajax.reload();
+                            alert("Reunión eliminada exitosamente.");
+                        } else {
+                            alert("No se pudo eliminar la reunión.");
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+
+        function Guardar() {
+            // Set the name of the employee in the hidden field
+            var selectedOption = $("#cboEmpleado option:selected");
+            $("#txtNombreEmpleado").val(selectedOption.data("nombre"));
+            var correoEmpleado = $("#cboEmpleado option:selected").data("correo");
+            $("#txtcorreo").val(correoEmpleado);
+
+            // Validate form
+            if ($("#formReunion")[0].checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+                $("#formReunion").addClass('was-validated');
+                return;
+            }
+
+            var request = {
+                IdReunion: parseInt($("#txtid").val()),
+                IdPersona: parseInt($("#cboEmpleado").val()),
+                Correo: $("#txtcorreo").val(),
+                NombreEmpleado: $("#txtNombreEmpleado").val(), // Add the employee name to the request
+                Fecha: $("#txtFecha").val(),
+                HoraInicio: $("#txtHoraInicio").val(),
+                HoraFin: $("#txtHoraFin").val(),
+                Lugar: $("#txtLugar").val(),
+                Descripcion: $("#txtDescripcion").val()
+            }
+
+            $.ajax({
+                url: '/api/Empleado/GuardarReunion',
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(request),
+                success: function (respuesta) {
+                    if (respuesta.respuesta) {
+                        tabladata.ajax.reload();
+                        $("#FormModal").modal("hide");
+                        alert("Reunión guardada exitosamente.");
+                    } else {
+                        alert("Ocurrió un error al guardar la reunión.");
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+}
+
+
+
+

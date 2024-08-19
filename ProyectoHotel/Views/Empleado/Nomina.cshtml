@@ -1,0 +1,413 @@
+﻿@model ProyectoHotel.Models.Nomina
+
+@{ ViewBag.Title = "Nóminas";
+                Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<!-- DataTables Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Nóminas</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-success btn-sm" type="button" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Rol</th>
+                                <th>Salario Base</th>
+                                <th>Deducciones</th>
+                                <th>Bonificaciones</th>
+                                <th>Salario Neto</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Rol</th>
+                                <th>Salario Base</th>
+                                <th>Deducciones</th>
+                                <th>Bonificaciones</th>
+                                <th>Salario Neto</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Nómina</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtNombreEmpleado" type="hidden" value="" />
+                <input id="txtcorreo" type="hidden" value="" />
+                <form id="formNomina">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEmpleado">Empleado:</label>
+                                <select id="cboEmpleado" class="form-control" required>
+                                    <option value="">Seleccione un empleado</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un empleado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="txtNombreRol" type="hidden" value="" />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboRol">Rol:</label>
+                                <select id="cboRol" class="form-control" required>
+                                    <option value="">Seleccione un Rol</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un rol.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtSalario">Salario:</label>
+                        <input type="text" id="txtSalario" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lstDeducciones">Deducciones:</label>
+                        <div id="lstDeducciones"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lstBonificaciones">Bonificaciones:</label>
+                        <div id="lstBonificaciones"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtDeducciones">Total Deducciones:</label>
+                        <input type="text" id="txtDeducciones" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtBonificaciones">Total Bonificaciones:</label>
+                        <input type="text" id="txtBonificaciones" class="form-control" readonly />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarNomina()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var tabladata;
+
+        $(document).ready(function () {
+            // Cargar opciones de empleados
+            jQuery.ajax({
+                url: '/api/Inicio/ListarPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboEmpleado").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        if (value.oTipoPersona.IdTipoPersona == 2) { // Filtra solo los empleados
+                            $("<option>").attr({ "value": value.IdPersona, "data-nombre": value.Nombre + ' ' + value.Apellido, "data-correo": value.Correo }).text(value.Nombre + ' ' + value.Apellido).appendTo("#cboEmpleado");
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de roles
+            jQuery.ajax({
+                url: '/api/Empleado/ListarRoles',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboRol").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        $("<option>").attr({ "value": value.IdRol, "data-salario": value.SalarioBase, "data-nombrerol": value.NombreRol }).text(value.NombreRol).appendTo("#cboRol");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de deducciones
+            jQuery.ajax({
+                url: '/api/Empleado/ListarDeducciones',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#lstDeducciones").empty(); // Limpia la lista antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        var checkbox = $('<div class="checkbox"><label><input type="checkbox" class="chkDeduccion" data-porcentaje="' + value.Porcentaje + '" /> ' + value.Descripcion + '</label></div>');
+                        $("#lstDeducciones").append(checkbox);
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de bonificaciones
+            jQuery.ajax({
+                url: '/api/Empleado/ListarBonificaciones',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#lstBonificaciones").empty(); // Limpia la lista antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        var checkbox = $('<div class="checkbox"><label><input type="checkbox" class="chkBonificacion" data-monto="' + value.Monto + '" /> ' + value.Descripcion + '</label></div>');
+                        $("#lstBonificaciones").append(checkbox);
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Configuración de DataTable
+            tabladata = $('#tabla').DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '/api/Empleado/ListarNominas',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreEmpleado" },
+                    { "data": "NombreRol" },
+                    { "data": "SalarioBase" },
+                    { "data": "Deducciones" },
+                    { "data": "Bonificaciones" },
+                    { "data": "SalarioNeto" },
+                    {
+                        "data": "IdNomina", "render": function (data, type, row) {
+                            return $("<button>").addClass("btn btn-primary btn-editar btn-sm").append(
+                                $("<i>").addClass("fas fa-pen")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                                +
+                                $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                    $("<i>").addClass("fas fa-trash")
+                                ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML;
+                        }
+                    }
+                ]
+            });
+
+            // Actualizar totales al cambiar el rol
+            $("#cboRol").change(function () {
+                var salario = $('option:selected', this).data('salario');
+                $('#txtSalario').val(salario);
+                actualizarTotales();
+            });
+
+            // Actualizar totales al seleccionar deducciones o bonificaciones
+            $(document).on('change', '.chkDeduccion, .chkBonificacion', function () {
+                actualizarTotales();
+            });
+
+            $('#tabla tbody').on('click', 'button.btn-editar', function () {
+                var id = $(this).attr("data-id");
+                abrirModal(id);
+            });
+        });
+
+        $(document).on('click', '.btn-editar', function () {
+            var json = $(this).data("informacion");
+            abrirModal(json);
+        });
+
+        $(document).on('click', '.btn-eliminar', function () {
+            var json = $(this).attr("data-informacion");
+            eliminar(JSON.parse(json));
+        });
+
+        function abrirModal(json) {
+            // Limpiar campos del modal
+            $("#txtid").val(0);
+            $("#cboEmpleado").val("");
+            $("#cboRol").val("");
+            $("#txtSalario").val("");
+            $("#txtDeducciones").val("");
+            $("#txtBonificaciones").val("");
+
+            // Si se pasa un objeto JSON con datos, actualizar los campos del modal
+            if (json != null) {
+                $("#txtid").val(json.IdNomina);
+                $("#cboEmpleado").val(json.IdPersona);
+                $("#txtNombreEmpleado").val(json.NombreEmpleado);
+                $("#txtcorreo").val(json.Correo);
+                $("#cboRol").val(json.IdRol);
+                $("#txtSalario").val(json.SalarioBase);
+                $("#txtDeducciones").val(json.Deducciones);
+                $("#txtBonificaciones").val(json.Bonificaciones);
+
+                // Cargar las deducciones seleccionadas
+                var deduccionesSeleccionadas = json.Deducciones.split(',').map(function (item) {
+                    return item.trim();
+                });
+                $(".chkDeduccion").each(function () {
+                    var descripcion = $(this).parent().text().trim();
+                    if (deduccionesSeleccionadas.includes(descripcion)) {
+                        $(this).prop('checked', true);
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                });
+
+                // Cargar las bonificaciones seleccionadas
+                var bonificacionesSeleccionadas = json.Bonificaciones.split(',').map(function (item) {
+                    return item.trim();
+                });
+                $(".chkBonificacion").each(function () {
+                    var descripcion = $(this).parent().text().trim();
+                    if (bonificacionesSeleccionadas.includes(descripcion)) {
+                        $(this).prop('checked', true);
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                });
+
+                actualizarTotales(); // Actualizar los totales según las deducciones y bonificaciones seleccionadas
+            }
+
+            // Mostrar el modal
+            $('#FormModal').modal('show');
+        }
+
+
+        function eliminar(json) {
+            if (confirm("¿Está seguro de eliminar esta nomina?")) {
+                $.ajax({
+                    url: '/api/Empleado/EliminarNomina/' + json.IdNomina,
+                    type: "DELETE",
+                    success: function (data) {
+                        if (data.resultado) {
+                            tabladata.ajax.reload();
+                            alert("Nomina eliminado exitosamente.");
+                        } else {
+                            alert("Ocurrió un error al eliminar el turno.");
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+
+        function actualizarTotales() {
+            var salario = parseFloat($('#txtSalario').val()) || 0;
+            var totalDeducciones = 0;
+            var totalBonificaciones = 0;
+
+            $('.chkDeduccion:checked').each(function () {
+                var porcentaje = $(this).data('porcentaje');
+                totalDeducciones += salario * (porcentaje / 100);
+            });
+
+            $('.chkBonificacion:checked').each(function () {
+                var monto = $(this).data('monto');
+                totalBonificaciones += monto;
+            });
+
+            $('#txtDeducciones').val(totalDeducciones.toFixed(2));
+            $('#txtBonificaciones').val(totalBonificaciones.toFixed(2));
+        }
+
+        function GuardarNomina() {
+            // Set the name of the employee in the hidden field
+            var selectedOption = $("#cboEmpleado option:selected");
+            $("#txtNombreEmpleado").val(selectedOption.data("nombre"));
+            // Set the name of the employee in the hidden field
+            var selectedOption = $("#cboRol option:selected");
+            $("#txtNombreRol").val(selectedOption.data("nombrerol"));
+
+            var correoEmpleado = $("#cboEmpleado option:selected").data("correo");
+            $("#txtcorreo").val(correoEmpleado);
+
+            var request = {
+                IdNomina: parseInt($("#txtid").val()),
+                IdPersona: parseInt($("#cboEmpleado").val()),
+                Correo: $("#txtcorreo").val(),
+                NombreEmpleado: $("#txtNombreEmpleado").val(), // Add the employee name to the request
+                NombreRol: $("#txtNombreRol").val(), // Add the employee name to the request
+                Fecha: $("#txtFecha").val(),
+                SalarioBase: parseFloat($("#txtSalario").val()),
+                Deducciones: parseFloat($("#txtDeducciones").val()),
+                Bonificaciones: parseFloat($("#txtBonificaciones").val())
+            };
+
+            $.ajax({
+                url: '/api/Empleado/GuardarNomina',
+                type: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                data: JSON.stringify(request),
+                success: function (respuesta) {
+                    if (respuesta.respuesta) {
+                        tabladata.ajax.reload();
+                        $('#FormModal').modal('hide');
+                        alert('Nómina guardada exitosamente.');
+                    } else {
+                        alert('Ocurrió un error al guardar la nómina.');
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+}
+
+
+
+
+
+

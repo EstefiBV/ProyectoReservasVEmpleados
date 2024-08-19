@@ -1,0 +1,135 @@
+﻿
+/* Estilos generales del cuerpo */
+body {
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilo del contenedor principal */
+.container {
+    margin-top: 50px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.col-md-8,
+.col-lg-6 {
+    max-width: 100%;
+}
+
+/* Estilo de la tarjeta */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #007bff;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Ampliar el contenido del cuerpo */
+.card-body {
+    padding: 2rem;
+}
+
+/* Estilos de los campos de formulario */
+.form-control {
+    border-radius: 5px;
+    box-shadow: none;
+    border: 1px solid #ced4da;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+/* Estilos de los campos de formulario en dispositivos más grandes */
+@media (min-width: 768px) {
+    .form-control {
+        font-size: 1rem;
+    }
+}
+
+/* Estilo del botón */
+.btn {
+    border-radius: 5px;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Mensaje de validación */
+#passwordValidationMessage {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.alert {
+    margin-top: 1rem;
+}
+
+/* Estilo de los selectores */
+select.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+/* Estilo del pie del modal */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+
+.modal-footer .btn {
+    margin-left: 0.5rem;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.875rem; /* Tamaño de fuente más pequeño que el estándar */
+    display: block; /* Asegura que el mensaje se muestre en una nueva línea */
+    margin-top: 0.25rem; /* Espacio arriba del mensaje para separación */
+}
+
+.form-group {
+    position: relative; /* Posiciona el mensaje de error en relación al campo del formulario */
+}
+
+.form-control:invalid {
+    border-color: red; /* Cambia el color del borde del campo cuando el valor no es válido */
+}
+
+.form-control:focus:invalid {
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25); /* Sombra alrededor del campo en foco cuando es inválido */
+}

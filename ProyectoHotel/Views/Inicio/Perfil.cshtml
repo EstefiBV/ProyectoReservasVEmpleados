@@ -1,0 +1,328 @@
+﻿
+@{
+    ViewBag.Title = "Perfil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <link href="~/css/styleregistro.css" rel="stylesheet" />
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Clientes</h6>
+    </div>
+    <div class="card-body">
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Tipo Documento</th>
+                                <th>Nro Documento</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Correo</th>
+                                <th>Estado</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Tipo Documento</th>
+                                <th>Nro Documento</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Correo</th>
+                                <th>Estado</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <form id="formNivel">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cbotipodocumento">Tipo Documento:</label>
+                                <select class="form-control" id="cbotipodocumento" name="tipodocumento" required disabled>
+                                    <option value="">Seleccione un tipo de documento</option>
+                                    <option value="DNI">DNI</option>
+                                    <option value="PASAPORTE">PASAPORTE</option>
+                                    <option value="CARNET EXTRANJERIA">CARNET EXTRANJERIA</option>
+                                </select>
+                                <span class="error-message" id="cbotipodocumento-error" style="display:none;">Este campo es obligatorio.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtdocumento">Nro Documento:</label>
+                                <input type="text" class="form-control" id="txtdocumento" name="documento" autocomplete="off" required pattern="\d{8,9}" title="Debe contener entre 8 y 9 dígitos numéricos.">
+                                <span class="error-message" id="txtdocumento-error" style="display:none;">Debe contener entre 8 y 9 dígitos numéricos.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtnombre">Nombre:</label>
+                                <input type="text" class="form-control" id="txtnombre" name="nombre" autocomplete="off" required pattern="[a-zA-Z\s]+" title="Solo se permiten letras y espacios.">
+                                <span class="error-message" id="txtnombre-error" style="display:none;">Solo se permiten letras y espacios.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtapellido">Apellido:</label>
+                                <input type="text" class="form-control" id="txtapellido" name="apellido" autocomplete="off" required pattern="[a-zA-Z\s]+" title="Solo se permiten letras y espacios.">
+                                <span class="error-message" id="txtapellido-error" style="display:none;">Solo se permiten letras y espacios.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtcorreo">Correo:</label>
+                                <input type="email" class="form-control" id="txtcorreo" name="correo" autocomplete="off" required>
+                                <span class="error-message" id="txtcorreo-error" style="display:none;">Por favor, ingrese una dirección de correo electrónico válida.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cbotipo">Tipo:</label>
+                                <select id="cbotipo" class="form-control"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtclave">Contraseña:</label>
+                                <input type="password" class="form-control" id="txtclave" name="clave" autocomplete="off" required minlength="6" title="Debe contener al menos 6 caracteres.">
+                                <span class="error-message" id="txtclave-error" style="display:none;">Debe contener al menos 6 caracteres.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEstado">Estado:</label>
+                                <select id="cboEstado" class="form-control" required>
+                                    <option value="">Seleccione el estado</option>
+                                    <option value="1">Activo</option>
+                                    <option value="0">No Activo</option>
+                                </select>
+                                <span class="error-message" id="cboEstado-error" style="display:none;">Este campo es obligatorio.</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+
+    <script>
+        var tabladata;
+        var idPersona = '@Session["IdPersona"]';
+
+        $(document).ready(function () {
+              jQuery.ajax({
+                  url: '/api/Inicio/ListarTipoPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $.each(data.data, function (index, value) {
+                            $("<option>").attr({ "value": value.IdTipoPersona }).text(value.Descripcion).appendTo("#cbotipo");
+                    });
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            });
+
+            tabladata = $('#tabla').DataTable({
+                responsive:true,
+                "ajax": {
+                    "url": '/api/Inicio/ListarUsuario?idPersona=' + idPersona,
+                    "type": "GET",
+                   "datatype": "json",
+                },
+                "columns": [
+                    { "data": "TipoDocumento" },
+                    { "data": "Documento" },
+                    { "data": "Nombre" },
+                    { "data": "Apellido" },
+                    { "data": "Correo" },
+                    {
+                        "data": "Estado", "render": function (data) {
+                            if (data) {
+                                return '<span class="badge badge-success p-2">Activo</span>'
+                            } else {
+                                return '<span class="badge badge-danger p-2">No Activo</span>'
+                            }
+                        }
+                    },
+                    {
+                        "data": "IdPersona", "render": function (data, type, row, meta) {
+
+                            return $("<button>").addClass("btn btn-primary btn-editar btn-sm").append(
+                                $("<i>").addClass("fas fa-pen")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                            +
+                            $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                $("<i>").addClass("fas fa-trash")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML;
+
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "90px"
+                    }
+
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                }
+            });
+        });
+
+
+        $(document).on('click', '.btn-editar', function (event) {
+            var json = $(this).data("informacion")
+
+            abrirModal(json)
+        });
+
+        function abrirModal(json) {
+            $("#txtid").val(0);
+            $("#cbotipodocumento").val($("#cbotipodocumento option:first").val());
+            $("#txtdocumento").val("");
+            $("#txtnombre").val("");
+            $("#txtapellido").val("");
+            $("#txtcorreo").val("");
+            $("#txtclave").val("");
+            $("#cbotipo").val(1);
+            $("#cboEstado").val(1);
+
+            if (json != null) {
+
+                $("#txtid").val(json.IdPersona);
+                $("#cbotipodocumento").val(json.TipoDocumento);
+                $("#txtdocumento").val(json.Documento);
+                $("#txtnombre").val(json.Nombre);
+                $("#txtapellido").val(json.Apellido);
+                $("#txtcorreo").val(json.Correo);
+                $("#txtclave").val(json.Clave);
+                $("#cbotipo").val(json.oTipoPersona.IdTipoPersona);
+                $("#cboEstado").val(json.Estado == true ? 1 : 0);
+            }
+
+            $('#FormModal').modal('show');
+        }
+
+        $(document).on('click', '.btn-eliminar', function () {
+            var json = $(this).attr("data-informacion");
+            eliminarPersona(JSON.parse(json));
+        });
+
+        function eliminarPersona(json) {
+            if (confirm("¿Está seguro de eliminar este cliente?")) {
+                jQuery.ajax({
+                    url: '/api/Inicio/EliminarPersonaPerfil/' + json.IdPersona,
+                    type: "DELETE", // Cambia el tipo de solicitud a DELETE
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if (data.resultado) {
+                            tabladata.ajax.reload();
+                        } else {
+                            alert("No se pudo eliminar");
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+
+        function Guardar() {
+            // Crear el objeto de solicitud con la estructura esperada
+            var request = {
+                IdPersona: $("#txtid").val(),
+                TipoDocumento: $("#cbotipodocumento").val(),
+                Documento: $("#txtdocumento").val(),
+                Nombre: $("#txtnombre").val(),
+                Apellido: $("#txtapellido").val(),
+                Correo: $("#txtcorreo").val(),
+                Clave: $("#txtclave").val(),
+                oTipoPersona: { IdTipoPersona: $("#cbotipo option:selected").val() },
+                Estado: parseInt($("#cboEstado").val()) === 1
+            };
+
+            // Realizar la llamada AJAX
+            jQuery.ajax({
+                url: '/api/Inicio/ModificarPersona',  // Asegúrate de que esta URL sea correcta
+                type: "POST",
+                data: JSON.stringify(request),  // Pasar solo el objeto `request` directamente
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.resultado) {
+                        tabladata.ajax.reload();  // Recargar los datos en la tabla
+                        $('#FormModal').modal('hide');  // Cerrar el modal
+                    } else {
+                        alert("No se pudo guardar los cambios");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error.responseText);  // Mejorar el manejo de errores
+                },
+                beforeSend: function () {
+                    // Puedes añadir lógica aquí si es necesario antes de enviar la solicitud
+                }
+            });
+        }
+
+
+    </script>
+
+}
+
+
+

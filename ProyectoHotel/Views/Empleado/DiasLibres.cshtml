@@ -1,0 +1,279 @@
+﻿@{
+        ViewBag.Title = "Días Libres";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- DataTables Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Días Libres</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-success btn-sm" type="button" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Tipo de Día Libre</th>
+                                <th>Motivo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Tipo de Día Libre</th>
+                                <th>Motivo</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Día Libre</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtNombreEmpleado" type="hidden" value="" />
+                <input id="txtcorreo" type="hidden" value="" />
+                <form id="formDiaLibre" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEmpleado">Empleado:</label>
+                                <select id="cboEmpleado" class="form-control" required>
+                                    <option value="">Seleccione un empleado</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un empleado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtFecha">Fecha:</label>
+                                <input type="date" class="form-control" id="txtFecha" name="fecha" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la fecha.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtTipoDiaLibre">Tipo de Día Libre:</label>
+                                <input type="text" class="form-control" id="txtTipoDiaLibre" name="tipoDiaLibre" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese el tipo de día libre.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtMotivo">Motivo:</label>
+                                <textarea class="form-control" id="txtMotivo" name="motivo" required></textarea>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese el motivo.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var tabladata;
+
+        $(document).ready(function () {
+            // Cargar opciones de empleados
+            jQuery.ajax({
+                url: '/api/Inicio/ListarPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboEmpleado").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        if (value.oTipoPersona.IdTipoPersona == 2) {
+                            $("<option>").attr({ "value": value.IdPersona, "data-nombre": value.Nombre + ' ' + value.Apellido, "data-correo": value.Correo }).text(value.Nombre + ' ' + value.Apellido).appendTo("#cboEmpleado");
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Configuración de DataTable
+            tabladata = $('#tabla').DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '/api/Empleado/ListarDiasLibres',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreEmpleado" }, // Asegúrate de que el nombre de la columna sea el correcto
+                    { "data": "Fecha" },
+                    { "data": "TipoDiaLibre" },
+                    { "data": "Motivo" },
+                    {
+                        "data": "IdDiaLibre", "render": function (data, type, row) {
+                            return $("<button>").addClass("btn btn-primary btn-editar btn-sm").append(
+                                $("<i>").addClass("fas fa-pen")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                                +
+                                $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                    $("<i>").addClass("fas fa-trash")
+                                ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "90px"
+                    }
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-editar', function () {
+            var json = $(this).data("informacion");
+            abrirModal(json);
+        });
+
+        function abrirModal(json) {
+            $("#txtid").val(0);
+            $("#cboEmpleado").val("");
+            $("#txtNombreEmpleado").val("");
+            $("#txtFecha").val("");
+            $("#txtTipoDiaLibre").val("");
+            $("#txtMotivo").val("");
+
+            if (json != null) {
+                $("#txtid").val(json.IdDiaLibre);
+                $("#cboEmpleado").val(json.IdPersona);
+                $("#txtNombreEmpleado").val(json.NombreEmpleado); // Set the hidden field value
+                $("#txtFecha").val(json.Fecha);
+                $("#txtTipoDiaLibre").val(json.TipoDiaLibre);
+                $("#txtMotivo").val(json.Motivo);
+            }
+
+            $('#FormModal').modal('show');
+        }
+
+        $(document).on('click', '.btn-eliminar', function () {
+            var json = $(this).attr("data-informacion");
+            eliminarDiaLibre(JSON.parse(json));
+        });
+
+        function eliminarDiaLibre(json) {
+            if (confirm("¿Está seguro de eliminar este día libre?")) {
+                $.ajax({
+                    url: '/api/Empleado/EliminarDiaLibre/' + json.IdDiaLibre,
+                    type: "DELETE",
+                    success: function (data) {
+                        if (data.resultado) {
+                            tabladata.ajax.reload();
+                            alert("Día libre eliminado exitosamente.");
+                        } else {
+                            alert("Ocurrió un error al eliminar el día libre.");
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+
+        function Guardar() {
+            // Set the name of the employee in the hidden field
+            var selectedOption = $("#cboEmpleado option:selected");
+            $("#txtNombreEmpleado").val(selectedOption.data("nombre"));
+            var correoEmpleado = $("#cboEmpleado option:selected").data("correo");
+            $("#txtcorreo").val(correoEmpleado);
+
+            // Validate form
+            if ($("#formDiaLibre")[0].checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+                $("#formDiaLibre").addClass('was-validated');
+                return;
+            }
+
+            var request = {
+                IdDiaLibre: parseInt($("#txtid").val()),
+                IdPersona: parseInt($("#cboEmpleado").val()),
+                NombreEmpleado: $("#txtNombreEmpleado").val(), // Add the employee name to the request
+                Fecha: $("#txtFecha").val(),
+                Correo: $("#txtcorreo").val(),
+                TipoDiaLibre: $("#txtTipoDiaLibre").val(),
+                Motivo: $("#txtMotivo").val()
+            }
+
+            $.ajax({
+                url: '/api/Empleado/GuardarDiaLibre',
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(request),
+                success: function (respuesta) {
+                    if (respuesta.respuesta) {
+                        tabladata.ajax.reload();
+                        $("#FormModal").modal("hide");
+                        alert("Día libre guardado exitosamente.");
+                    } else {
+                        alert("Ocurrió un error al guardar el día libre.");
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+}
+
+
+
+
+

@@ -1,0 +1,269 @@
+﻿@model ProyectoHotel.Models.Nomina
+
+@{ ViewBag.Title = "Nóminas";
+                Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<!-- DataTables Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Nóminas</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Rol</th>
+                                <th>Salario Base</th>
+                                <th>Deducciones</th>
+                                <th>Bonificaciones</th>
+                                <th>Salario Neto</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Rol</th>
+                                <th>Salario Base</th>
+                                <th>Deducciones</th>
+                                <th>Bonificaciones</th>
+                                <th>Salario Neto</th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Nómina</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtNombreEmpleado" type="hidden" value="" />
+                <input id="txtcorreo" type="hidden" value="" />
+                <form id="formNomina">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEmpleado">Empleado:</label>
+                                <select id="cboEmpleado" class="form-control" required>
+                                    <option value="">Seleccione un empleado</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un empleado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="txtNombreRol" type="hidden" value="" />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboRol">Rol:</label>
+                                <select id="cboRol" class="form-control" required>
+                                    <option value="">Seleccione un Rol</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un rol.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtSalario">Salario:</label>
+                        <input type="text" id="txtSalario" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lstDeducciones">Deducciones:</label>
+                        <div id="lstDeducciones"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lstBonificaciones">Bonificaciones:</label>
+                        <div id="lstBonificaciones"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtDeducciones">Total Deducciones:</label>
+                        <input type="text" id="txtDeducciones" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtBonificaciones">Total Bonificaciones:</label>
+                        <input type="text" id="txtBonificaciones" class="form-control" readonly />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarNomina()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var tabladata;
+        var idPersona = '@Session["IdPersona"]';
+
+        $(document).ready(function () {
+            // Cargar opciones de empleados
+            jQuery.ajax({
+                url: '/api/Inicio/ListarPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboEmpleado").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        if (value.oTipoPersona.IdTipoPersona == 3) { // Filtra solo los empleados
+                            $("<option>").attr({ "value": value.IdPersona, "data-nombre": value.Nombre + ' ' + value.Apellido, "data-correo": value.Correo }).text(value.Nombre + ' ' + value.Apellido).appendTo("#cboEmpleado");
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de roles
+            jQuery.ajax({
+                url: '/api/Empleado/ListarRoles',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboRol").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        $("<option>").attr({ "value": value.IdRol, "data-salario": value.SalarioBase, "data-nombrerol": value.NombreRol }).text(value.NombreRol).appendTo("#cboRol");
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de deducciones
+            jQuery.ajax({
+                url: '/api/Empleado/ListarDeducciones',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#lstDeducciones").empty(); // Limpia la lista antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        var checkbox = $('<div class="checkbox"><label><input type="checkbox" class="chkDeduccion" data-porcentaje="' + value.Porcentaje + '" /> ' + value.Descripcion + '</label></div>');
+                        $("#lstDeducciones").append(checkbox);
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Cargar opciones de bonificaciones
+            jQuery.ajax({
+                url: '/api/Empleado/ListarBonificaciones',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#lstBonificaciones").empty(); // Limpia la lista antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        var checkbox = $('<div class="checkbox"><label><input type="checkbox" class="chkBonificacion" data-monto="' + value.Monto + '" /> ' + value.Descripcion + '</label></div>');
+                        $("#lstBonificaciones").append(checkbox);
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Configuración de DataTable
+            tabladata = $('#tabla').DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '/api/Empleado/ListarNominaEmpleado?idPersona=' + idPersona,
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreEmpleado" },
+                    { "data": "NombreRol" },
+                    { "data": "SalarioBase" },
+                    { "data": "Deducciones" },
+                    { "data": "Bonificaciones" },
+                    { "data": "SalarioNeto" }
+                ]
+            });
+
+            // Actualizar totales al cambiar el rol
+            $("#cboRol").change(function () {
+                var salario = $('option:selected', this).data('salario');
+                $('#txtSalario').val(salario);
+                actualizarTotales();
+            });
+
+            // Actualizar totales al seleccionar deducciones o bonificaciones
+            $(document).on('change', '.chkDeduccion, .chkBonificacion', function () {
+                actualizarTotales();
+            });
+        });
+
+        function actualizarTotales() {
+            var salario = parseFloat($('#txtSalario').val()) || 0;
+            var totalDeducciones = 0;
+            var totalBonificaciones = 0;
+
+            $('.chkDeduccion:checked').each(function () {
+                var porcentaje = $(this).data('porcentaje');
+                totalDeducciones += salario * (porcentaje / 100);
+            });
+
+            $('.chkBonificacion:checked').each(function () {
+                var monto = $(this).data('monto');
+                totalBonificaciones += monto;
+            });
+
+            $('#txtDeducciones').val(totalDeducciones.toFixed(2));
+            $('#txtBonificaciones').val(totalBonificaciones.toFixed(2));
+        }
+
+       
+    </script>
+}
+
+
+
+
+
+

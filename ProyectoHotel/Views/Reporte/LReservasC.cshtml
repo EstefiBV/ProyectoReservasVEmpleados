@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Lista de Reservas Canceladas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Reservas Canceladas</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="tablaReservas" style="width:100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Vuelo</th>
+                        <th>Tipo de Asiento</th>
+                        <th>Peso Equipaje KG</th>
+                        <th>Precio Total Dolares</th>
+                        <th>Cantidad Pasajeros</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Inicializar DataTable para listar reservas canceladas
+            var tablaReservas = $('#tablaReservas').DataTable({
+                responsive: true,
+                ajax: {
+                    url: '/api/Reporte/ListarReservasCanceladas', // URL del método API
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: 'data' // Asegúrate de que el JSON devuelto tiene la propiedad 'data'
+                },
+                columns: [
+                    { data: "oVuelo.Destino" },
+                    { data: "oTipoAsiento.Descripcion" },
+                    { data: "oEquipaje.Peso" },
+                    { data: "PrecioTotal" },
+                    { data: "CantidadPasajeros" }
+                ],
+                order: [[0, 'asc']]
+            });
+        });
+    </script>
+}
+

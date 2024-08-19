@@ -1,0 +1,288 @@
+﻿@{
+    ViewBag.Title = "Turnos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- DataTables Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-primary">
+        <h6 class="m-0 font-weight-bold text-white">Lista de Turnos</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-success btn-sm" type="button" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tabla" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Turno</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtcorreo" type="hidden" value="" />
+                <form id="formTurno" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboEmpleado">Empleado:</label>
+                                <select id="cboEmpleado" class="form-control" required>
+                                    <option value="">Seleccione un empleado</option>
+                                </select>
+                                <input type="hidden" id="txtNombreEmpleado" />
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione un empleado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="cboDias">Días:</label>
+                                <select id="cboDias" class="form-control">
+                                    <option value="Lunes">Lunes</option>
+                                    <option value="Martes">Martes</option>
+                                    <option value="Miércoles">Miércoles</option>
+                                    <option value="Jueves">Jueves</option>
+                                    <option value="Viernes">Viernes</option>
+                                    <option value="Sábado">Sábado</option>
+                                    <option value="Domingo">Domingo</option>
+                                    <option value="Lunes a Viernes">Lunes a Viernes</option>
+                                    <option value="Sábado y Domingo">Sábado y Domingo</option>
+                                    <!-- Agrega más opciones según sea necesario -->
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, seleccione los días.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txthoraInicio">Hora Inicio:</label>
+                                <input type="time" class="form-control required" id="txthoraInicio" name="horaInicio" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la hora de inicio.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txthoraFin">Hora Fin:</label>
+                                <input type="time" class="form-control required" id="txthoraFin" name="horaFin" required>
+                                <div class="invalid-feedback">
+                                    Por favor, ingrese la hora de fin.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var tabladata;
+
+        $(document).ready(function () {
+            // Cargar opciones de empleados
+            jQuery.ajax({
+                url: '/api/Inicio/ListarPersona',
+                type: "GET",
+                data: null,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    var data = response.data;
+                    $("#cboEmpleado").empty(); // Limpia el combo box antes de agregar nuevas opciones
+                    $.each(data, function (index, value) {
+                        if (value.oTipoPersona.IdTipoPersona == 2) {
+                            $("<option>").attr({ "value": value.IdPersona, "data-nombre": value.Nombre + ' ' + value.Apellido, "data-correo": value.Correo }).text(value.Nombre + ' ' + value.Apellido).appendTo("#cboEmpleado");
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Configuración de DataTable
+            tabladata = $('#tabla').DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '/api/Empleado/ListarTurnos',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreEmpleado" },
+                    { "data": "Dias" },
+                    { "data": "HoraInicio" },
+                    { "data": "HoraFin" },
+                    {
+                        "data": "IdTurno", "render": function (data, type, row) {
+                            return $("<button>").addClass("btn btn-primary btn-editar btn-sm").append(
+                                $("<i>").addClass("fas fa-pen")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                                +
+                                $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                    $("<i>").addClass("fas fa-trash")
+                                ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "90px"
+                    }
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                }
+            });
+
+            // Obtener el nombre del empleado al seleccionar una opción
+            $("#cboEmpleado").change(function () {
+                var nombreEmpleado = $("#cboEmpleado option:selected").data("nombre");
+                $("#txtNombreEmpleado").val(nombreEmpleado);
+            });
+
+            // Obtener el nombre del empleado al seleccionar una opción
+            $("#cboEmpleado").change(function () {
+                var correoEmpleado = $("#cboEmpleado option:selected").data("correo");
+                $("#txtcorreo").val(correoEmpleado);
+            });
+        });
+       
+        $(document).on('click', '.btn-editar', function () {
+            var json = $(this).data("informacion");
+            abrirModal(json);
+        });
+
+        function abrirModal(json) {
+            $("#txtid").val(0);
+            $("#cboEmpleado").val("");
+            $("#txtNombreEmpleado").val("");
+            $("#cboDias").val("");
+            $("#txthoraInicio").val("");
+            $("#txthoraFin").val("");
+
+            if (json != null) {
+                $("#txtid").val(json.IdTurno);
+                $("#cboEmpleado").val(json.IdPersona);
+                $("#txtNombreEmpleado").val(json.NombreEmpleado);
+                $("#cboDias").val(json.Dias);
+                $("#txthoraInicio").val(json.HoraInicio);
+                $("#txthoraFin").val(json.HoraFin);
+            }
+
+            $('#FormModal').modal('show');
+        }
+
+        $(document).on('click', '.btn-eliminar', function () {
+            var json = $(this).attr("data-informacion");
+            eliminarTurno(JSON.parse(json));
+        });
+
+        function eliminarTurno(json) {
+            if (confirm("¿Está seguro de eliminar este turno?")) {
+                $.ajax({
+                    url: '/api/Empleado/EliminarTurno/' + json.IdTurno,
+                    type: "DELETE",
+                    success: function (data) {
+                        if (data.resultado) {
+                            tabladata.ajax.reload();
+                            alert("Turno eliminado exitosamente.");
+                        } else {
+                            alert("Ocurrió un error al eliminar el turno.");
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+
+        function Guardar() {
+            var request = {
+                IdTurno: parseInt($("#txtid").val()),
+                IdPersona: parseInt($("#cboEmpleado").val()),
+                NombreEmpleado: $("#txtNombreEmpleado").val(),
+                Correo: $("#txtcorreo").val(),
+                Dias: $("#cboDias").val(),
+                HoraInicio: $("#txthoraInicio").val(),
+                HoraFin: $("#txthoraFin").val()
+            };
+
+            $.ajax({
+                url: '/api/Empleado/GuardarTurno',
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(request),
+                success: function (respuesta) {
+                    if (respuesta.respuesta) {
+                        tabladata.ajax.reload();
+                        $("#FormModal").modal("hide");
+                        alert("Turno guardado exitosamente.");
+                    } else {
+                        alert("Ocurrió un error al guardar el turno.");
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+}
+
+
+

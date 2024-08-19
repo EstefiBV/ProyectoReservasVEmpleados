@@ -1,0 +1,114 @@
+﻿/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fc;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #4e73df;
+    color: #fff;
+}
+
+.sidebar .nav-item .nav-link {
+    color: #fff;
+}
+
+.sidebar .nav-item .nav-link:hover {
+    background-color: #2e59d9;
+}
+
+.sidebar .nav-item .collapse-inner {
+    background-color: #f8f9fc;
+}
+
+.sidebar .nav-item .collapse-item {
+    color: #858796;
+}
+
+.sidebar .nav-item .collapse-item:hover {
+    color: #4e73df;
+}
+
+/* Topbar Styles */
+.topbar {
+    background-color: #fff;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.topbar .nav-link {
+    color: #5a5c69;
+}
+
+.topbar .nav-link:hover {
+    color: #4e73df;
+}
+
+.topbar .dropdown-menu {
+    border: 1px solid #e3e6f0;
+}
+
+.topbar .badge-counter {
+    background-color: #e74a3b;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #4e73df;
+    color: #fff;
+    font-weight: bold;
+}
+
+.card-footer {
+    background-color: #f8f9fc;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+    background-color: #fff;
+    border: 1px solid #e3e6f0;
+}
+
+.dropdown-item {
+    color: #858796;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fc;
+    color: #4e73df;
+}
+
+/* Footer Styles */
+.footer {
+    background-color: #fff;
+    border-top: 1px solid #e3e6f0;
+}
+
+/* Miscellaneous */
+.text-center {
+    text-align: center;
+}
+
+.text-gray-600 {
+    color: #858796;
+}
+
+.bg-white {
+    background-color: #fff;
+}

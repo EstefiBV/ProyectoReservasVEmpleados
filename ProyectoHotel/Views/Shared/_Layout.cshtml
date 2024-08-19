@@ -1,0 +1,294 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>SB Admin 2 - Blank</title>
+    <!-- Custom fonts for this template-->
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" href="~/css/stylelayout.css">
+</head>
+<body id="page-top">
+
+    @{ ProyectoHotel.Models.Persona objeto = ((ProyectoHotel.Models.Persona)Session["Usuario"]); }
+
+    @if (objeto != null)
+    {
+        <!-- Page Wrapper -->
+        <div id="wrapper">
+            <!-- Sidebar -->
+            <ul class="navbar-nav bg-gradient-secondary sidebar sidebar-dark accordion" id="accordionSidebar">
+                <!-- Sidebar - Brand -->
+                <a class="sidebar-brand d-flex align-items-center justify-content-center" href="@Url.Action("Index", "Inicio")">
+                    <div class="sidebar-brand-icon">
+                        <i class="fas fa-plane"></i> <!-- Cambiado a un icono de avión -->
+                    </div>
+                    <div class="sidebar-brand-text mx-3">Reserva de Vuelos</div>
+                </a>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider my-0">
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Inicio")">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                @if (objeto.oTipoPersona.IdTipoPersona != 3)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseamantenimiento"
+                           aria-expanded="true" aria-controls="collapseamantenimiento">
+                            <i class="fas fa-fw fa-book-reader"></i>
+                            <span>Registro de Vuelos</span>
+                        </a>
+                        <div id="collapseamantenimiento" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <a class="collapse-item" href="@Url.Action("Vuelos", "Mantenimiento")">Vuelos</a>
+                                <a class="collapse-item" href="@Url.Action("Aerolinea", "Mantenimiento")">Aerolinea</a>
+                                <a class="collapse-item" href="@Url.Action("Aeropuertos", "Mantenimiento")">Aeropuertos</a>
+                                <a class="collapse-item" href="@Url.Action("Equipaje", "Mantenimiento")">Equipaje</a>
+                                <a class="collapse-item" href="@Url.Action("TipoAsiento", "Mantenimiento")">Tipo de Asiento</a>
+                            </div>
+                        </div>
+                    </li>
+                }
+
+                @if (objeto.oTipoPersona.IdTipoPersona != 2)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsedTurno"
+                           aria-expanded="true" aria-controls="collapsedTurno">
+                            <i class="fas fa-fw fa-book-reader"></i>
+                            <span>Gestión de Empleados</span>
+                        </a>
+                        <div id="collapsedTurno" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <a class="collapse-item" href="@Url.Action("Turno", "Empleado")">Turnos</a>
+                                <a class="collapse-item" href="@Url.Action("DiasLibres", "Empleado")">Días Libres</a>
+                                <a class="collapse-item" href="@Url.Action("Permiso", "Empleado")">Permisos</a>
+                                <a class="collapse-item" href="@Url.Action("Nomina", "Empleado")">Nómina</a>
+                                <a class="collapse-item" href="@Url.Action("Evaluacion", "Empleado")">Evaluación</a>
+                                <a class="collapse-item" href="@Url.Action("Reunion", "Empleado")">Reuniones</a>
+                            </div>
+                        </div>
+                    </li>
+
+                }
+
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReporte"
+                       aria-expanded="true" aria-controls="collapseReporte">
+                        <i class="fas fa-edit"></i>
+                        <span>Reservas de Vuelos</span>
+                    </a>
+                    <div id="collapseReporte" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" href="@Url.Action("Reservas", "Reporte")">Registrar una reserva</a>
+                            <a class="collapse-item" href="@Url.Action("ReservasUsuario", "Reporte")">Estado de las Reservas</a>
+                            <a class="collapse-item" href="@Url.Action("LVuelos", "Mantenimiento")">Lista de vuelos</a>
+                            <a class="collapse-item" href="@Url.Action("Carrito", "Reporte")">Carrito</a>
+                        </div>
+                    </div>
+                </li>
+
+
+
+                @if (objeto.oTipoPersona.IdTipoPersona != 3)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestion"
+                           aria-expanded="true" aria-controls="collapseGestion">
+                            <i class="fas fa-edit"></i>
+                            <span>Gestión de Reservas</span>
+                        </a>
+                        <div id="collapseGestion" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <a class="collapse-item" href="@Url.Action("Modificar", "Reporte")">Pago de reserva</a>
+                                <a class="collapse-item" href="@Url.Action("LReservasC", "Reporte")">Reservas pagadas</a>
+                            </div>
+                        </div>
+                    </li>
+                }
+
+
+                @if (objeto.oTipoPersona.IdTipoPersona == 2)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEmpleado"
+                           aria-expanded="true" aria-controls="collapseEmpleado">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Datos Empleado</span>
+                        </a>
+                        <div id="collapseEmpleado" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <a class="collapse-item" href="@Url.Action("NominaEmpleado", "Empleado")">Nómina</a>
+                                <a class="collapse-item" href="@Url.Action("TurnoEmpleado", "Empleado")">Turno</a>
+                                <a class="collapse-item" href="@Url.Action("DiasLibresEmpleado", "Empleado")">Días Libres</a>
+                                <a class="collapse-item" href="@Url.Action("EvaluacionEmpleado", "Empleado")">Evaluación</a>
+                                <a class="collapse-item" href="@Url.Action("ReunionEmpleado", "Empleado")">Reuniones</a>
+                                <a class="collapse-item" href="@Url.Action("PermisoEmpleado", "Empleado")">Permisos</a>
+                            </div>
+                        </div>
+                    </li>
+
+                }
+
+                @if (objeto.oTipoPersona.IdTipoPersona == 1)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Usuario", "Inicio")">
+                            <i class="fas fa-user-friends"></i>
+                            <span>Usuarios</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Cliente", "Inicio")">
+                            <i class="fas fa-user-friends"></i>
+                            <span>Clientes</span>
+                        </a>
+                    </li>
+                }
+
+
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Perfil", "Inicio")">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Perfil</span>
+                    </a>
+                </li>
+                <!-- Divider -->
+                <hr class="sidebar-divider d-none d-md-block">
+                <!-- Sidebar Toggler (Sidebar) -->
+                <div class="text-center d-none d-md-inline">
+                    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+                </div>
+            </ul>
+            <!-- End of Sidebar -->
+            <!-- Content Wrapper -->
+            <div id="content-wrapper" class="d-flex flex-column">
+                <!-- Main Content -->
+                <div id="content">
+                    <!-- Topbar -->
+                    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                        <!-- Sidebar Toggle (Topbar) -->
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <!-- Agregar el icono del carrito aquí -->
+                        <ul class="navbar-nav ml-auto">
+                            <!-- Carrito de compras -->
+                            <li class="nav-item dropdown no-arrow mx-1">
+                                <a class="nav-link dropdown-toggle" href="#" id="carritoDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <!-- Contador de reservas -->
+                                    <span id="contadorCarrito" class="badge badge-danger badge-counter">0</span>
+                                </a>
+                                <!-- Dropdown del carrito -->
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="carritoDropdown">
+                                    <a class="dropdown-item" href="@Url.Action("Carrito", "Reporte")">
+                                        Ver Carrito
+                                    </a>
+                                </div>
+                            </li>
+
+                            <div class="topbar-divider d-none d-sm-block"></div>
+                            <!-- Nav Item - User Information -->
+                            <li class="nav-item dropdown no-arrow">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">@($"{objeto.Nombre} {objeto.Apellido}")</span>
+                                    <i class="fas fa-user-shield" style="font-size:25px;font-weight:bold"></i>
+                                </a>
+                                <!-- Dropdown - User Information -->
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                     aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="@Url.Action("CerrarSesion", "Inicio")">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Salir
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+                    <!-- End of Topbar -->
+                    <!-- Begin Page Content -->
+                    <div class="container-fluid">
+                        <!-- Page Heading -->
+                        @RenderBody()
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+                <!-- End of Main Content -->
+                <!-- Footer -->
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Website 2024</span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
+            </div>
+            <!-- End of Content Wrapper -->
+        </div>
+        <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+        <!-- Logout Modal-->
+        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-primary" href="login.html">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }@if (objeto == null)
+    { @RenderBody()}
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    @if (objeto != null)
+    {
+        <script>
+        $(document).ready(function () {
+        actualizarContadorCarrito();
+
+        function actualizarContadorCarrito() {
+            $.ajax({
+                url: '@Url.Action("ContarReservasUsuario", "Reporte")',
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    $("#contadorCarrito").text(data.contador);
+                },
+                error: function (error) {
+                    console.log("Error al obtener el contador del carrito:", error);
+                }
+            });
+        }
+        });
+
+        </script>
+    }
+</body>
+</html>

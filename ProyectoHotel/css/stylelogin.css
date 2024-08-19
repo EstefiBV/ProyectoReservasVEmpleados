@@ -1,0 +1,88 @@
+﻿body {
+    background: linear-gradient(to right, #0062E6, #33AEFF), #f0f0f0; /* fondo gris claro (#f0f0f0) */
+    background-blend-mode: lighten; /* Mezclar los colores del degradado con el fondo gris claro */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+
+.container {
+    max-width: 400px;
+    width: 100%;
+    padding: 15px;
+}
+
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.form-control {
+    border-radius: 2rem;
+    padding: 0.75rem 1rem;
+}
+
+.btn-user {
+    border-radius: 2rem;
+    padding: 0.75rem 1rem;
+}
+
+
+.bg-primary {
+    background-color: #FF5733 !important; /* color */
+}
+
+.text-primary {
+    color: #FF5733 !important; /* color */
+}
+
+.text-danger {
+    color: #C70039 !important; /* color */
+}
+
+.text-center {
+    text-align: center;
+}
+
+.alert-danger {
+    color: #fff;
+    background-color: #C70039; /* color */
+    border-color: #C70039; /* color */
+    border-radius: 2rem;
+    padding: 0.75rem 1rem;
+}
+
+.btn-primary {
+    background-color: #FF5733; /* color */
+    border: none;
+}
+
+    .btn-primary:hover {
+        background-color: #C70039; /* color */
+    }
+
+/* Estilos para los mensajes de error */
+.error-message {
+    color: red;
+    font-size: 0.875rem; /* Tamaño de fuente más pequeño que el estándar */
+    display: block; /* Asegura que el mensaje se muestre en una nueva línea */
+    margin-top: 0.25rem; /* Espacio arriba del mensaje para separación */
+}
+
+/* Estilo para campos de formulario inválidos */
+.form-control:invalid {
+    border-color: red; /* Cambia el color del borde del campo cuando el valor no es válido */
+}
+
+/* Estilo para campos de formulario en foco y inválidos */
+.form-control:focus:invalid {
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25); /* Sombra alrededor del campo en foco cuando es inválido */
+}
